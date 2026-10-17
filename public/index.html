@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Fratel | Location Comparison</title>
+  <link rel="icon" href="/vendor/icons/radar.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/vendor/leaflet/leaflet.js" defer></script>
+  <script src="/vendor/socket.io/socket.io.min.js" defer></script>
+  <script src="/app.js" type="module"></script>
+  <script src="/network.js" type="module"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Fratel home"><img src="/vendor/icons/radar.svg" alt="" width="25" height="25">fratel<span class="brand-divider"></span><span class="brand-context">Location monitor</span></a>
+    <span class="session-label"><span class="status-dot"></span>Local session</span>
+  </header>
+  <main>
+    <div class="page-heading">
+      <div><p class="eyebrow">LOCATION INTELLIGENCE</p><h1>Location comparison</h1></div>
+      <button id="refresh" class="text-button" type="button" title="Refresh locations" aria-label="Refresh locations"><img src="/vendor/icons/refresh-cw.svg" alt="" width="16" height="16">Refresh locations</button>
+    </div>
+    <div class="workspace">
+      <section class="map-section" aria-labelledby="map-title">
+        <div class="section-toolbar"><h2 id="map-title">Map view</h2><div class="legend"><span><i class="legend-dot ip-dot"></i>IP location</span><span><i class="legend-dot gps-dot"></i>Browser location</span></div></div>
+        <div class="map-stage">
+          <div id="map" role="region" aria-label="Map of IP and browser locations"></div>
+          <button id="fit-map" class="icon-button map-fit" type="button" title="Fit both locations" aria-label="Fit both locations" disabled><img src="/vendor/icons/maximize.svg" alt="" width="18" height="18"></button>
+        </div>
+        <p id="map-status" class="map-status" role="status">Loading map...</p>
+      </section>
+      <aside class="location-panel" aria-labelledby="locations-title">
+        <div class="panel-heading"><h2 id="locations-title">Location sources</h2><span class="source-count" id="source-count">0 / 2</span></div>
+        <section class="source-section" aria-labelledby="ip-title">
+          <div class="source-title"><h3 id="ip-title"><span class="legend-dot ip-dot"></span>IP-based location</h3><span id="ip-badge" class="badge">Pending</span></div>
+          <p id="ip-place" class="place">Awaiting lookup</p>
+          <p id="ip-status" class="status-message" role="status">Looking up network location...</p>
+          <dl class="readouts"><div><dt>Public IP</dt><dd id="ip-address">--</dd></div><div><dt>Latitude</dt><dd id="ip-latitude">--</dd></div><div><dt>Longitude</dt><dd id="ip-longitude">--</dd></div><div><dt>ISP</dt><dd id="ip-isp">--</dd></div><div><dt>ASN</dt><dd id="ip-asn">--</dd></div></dl>
+        </section>
+        <section class="source-section" aria-labelledby="gps-title">
+          <div class="source-title"><h3 id="gps-title"><span class="legend-dot gps-dot"></span>Browser location</h3><span id="gps-badge" class="badge">Pending</span></div>
+          <p id="gps-place" class="place">Awaiting permission</p>
+          <p id="gps-status" class="status-message" role="status">Requesting high-accuracy location...</p>
+          <dl class="readouts"><div><dt>Latitude</dt><dd id="gps-latitude">--</dd></div><div><dt>Longitude</dt><dd id="gps-longitude">--</dd></div><div><dt>Accuracy radius</dt><dd id="gps-accuracy">--</dd></div><div><dt>Captured</dt><dd id="gps-captured">--</dd></div></dl>
+        </section>
+        <section class="offset-section" aria-labelledby="offset-title"><div class="offset-heading"><h3 id="offset-title">Distance offset</h3><img src="/vendor/icons/route.svg" alt="" width="18" height="18"></div><p class="distance"><span id="distance-km">--</span><span class="unit">km</span></p><p id="distance-miles" class="miles">-- miles</p><p id="distance-status" class="status-message" role="status">Waiting for both locations.</p></section>
+      </aside>
+    </div>
+    <section id="network-panel" class="network-panel" aria-labelledby="network-title" data-quality="neutral">
+      <div class="network-toolbar">
+        <div class="network-heading"><img src="/vendor/icons/activity.svg" alt="" width="18" height="18"><h2 id="network-title">Network quality</h2><span id="network-connection" class="network-connection" data-state="Connecting" role="status"><i></i><span id="network-status">Connecting</span></span></div>
+        <label class="interval-control" for="ping-interval">Interval<select id="ping-interval"><option value="1000">1 second</option><option value="1500" selected>1.5 seconds</option><option value="2000">2 seconds</option></select></label>
+      </div>
+      <div class="network-metrics">
+        <div class="current-metric"><p class="metric-label">Current RTT</p><p class="rtt-value"><span id="network-current">--</span><span>ms</span></p><p id="network-quality" class="quality-label">Awaiting sample</p></div>
+        <dl class="latency-stats"><div><dt>Average</dt><dd><span id="network-average">--</span><span class="metric-unit">ms</span></dd></div><div><dt>Minimum</dt><dd><span id="network-min">--</span><span class="metric-unit">ms</span></dd></div><div><dt>Maximum</dt><dd><span id="network-max">--</span><span class="metric-unit">ms</span></dd></div><div><dt>Jitter</dt><dd><span id="network-jitter">--</span><span class="metric-unit">ms</span></dd></div></dl>
+        <dl class="ping-counts"><div><dt>Pings sent</dt><dd id="network-sent">0</dd></div><div><dt>Acknowledged</dt><dd id="network-received">0</dd></div><div><dt>Timeouts</dt><dd id="network-timeouts">0</dd></div></dl>
+      </div>
+      <div class="network-footer"><p id="network-note">Establishing a connection...</p><div><span>Rolling samples <strong id="network-samples">0 / 60</strong></span><span>Transport <strong id="network-transport">--</strong></span></div></div>
+    </section>
+    <footer class="page-footer"><span><img src="/vendor/icons/lock-keyhole.svg" alt="" width="14" height="14">GPS coordinates are not sent to the backend.</span><span id="session-updated">No locations captured</span></footer>
+    <noscript><p class="noscript-message">JavaScript is required to load location data and the map.</p></noscript>
+  </main>
+</body>
+</html>

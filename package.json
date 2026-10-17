@@ -1,0 +1,30 @@
+{
+  "name": "fratel-geolocation-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Real-time geolocation and network quality dashboard",
+  "type": "module",
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "test": "node --test",
+    "check": "node --check server.js && node --check public/app.js && node --check public/location.js && node --check public/network.js && node --check public/telemetry.js && node --check test/server.test.js && node --check test/location.test.js && node --check test/telemetry.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "ipaddr.js": "^2.5.0",
+    "leaflet": "^1.9.4",
+    "lucide-static": "^1.59.0",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.4",
+    "supertest": "^7.3.1"
+  }
+}
